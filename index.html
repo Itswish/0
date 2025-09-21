@@ -12,15 +12,12 @@
       align-items: center;
       height: 100vh;
       background: #111;
-      color: #fff;
-      font-family: Arial, sans-serif;
     }
     video {
       width: 90%;
       max-width: 900px;
       border-radius: 8px;
       background: #000;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.6);
     }
   </style>
 </head>
@@ -29,21 +26,24 @@
 
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <script>
-    const url = "https://dish.slivcdn.com/hls/live/2020591/TEN3HD/master_3500.m3u8";
+    // आपके stream link को proxy के साथ load कर रहे हैं
+    const proxy = "https://cors-proxy.fringe.zone/";
+    const streamURL = "https://dish.slivcdn.com/hls/live/2020591/TEN3HD/master_3500.m3u8";
+    const finalURL = proxy + streamURL;
+
     const video = document.getElementById("video");
 
     if (video.canPlayType("application/vnd.apple.mpegurl")) {
-      // Safari, iOS: native HLS
-      video.src = url;
+      video.src = finalURL;
     } else if (Hls.isSupported()) {
       const hls = new Hls();
-      hls.loadSource(url);
+      hls.loadSource(finalURL);
       hls.attachMedia(video);
-      hls.on(Hls.Events.ERROR, function (event, data) {
-        console.error("HLS.js error:", data);
+      hls.on(Hls.Events.ERROR, (e, data) => {
+        console.error("HLS.js error", data);
       });
     } else {
-      alert("Your browser does not support HLS playback.");
+      alert("Browser does not support HLS");
     }
   </script>
 </body>
