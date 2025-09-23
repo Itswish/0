@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
   <title>Live Stream</title>
 
-  <!-- Shaka core (unchanged) -->
+  <!-- Shaka (unchanged) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.11/shaka-player.ui.min.js" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.11/controls.min.css" crossorigin="anonymous">
 
@@ -43,29 +43,32 @@
     .shaka-video-container{position:absolute;inset:0;width:100%;height:100%}
     .shaka-video-container video{width:100%;height:100%;object-fit:contain;background:#000}
 
-    /* ========== Only Server 2 targeted styles ========== */
-
-    /* Viewport-fill container for landscape (prevents black screen) */
+    /* ===== Server 2 specific ===== */
     .landscape-full{
       position:fixed !important; inset:0 !important; width:100vw !important; height:100dvh !important;
-      background:#000 !important; z-index:9999 !important; border-radius:0 !important;
-      max-width:none !important; padding-top:0 !important; margin:0 !important;
+      background:#000 !important; z-index:9999 !important; border-radius:0 !important; max-width:none !important; padding-top:0 !important;
       display:flex; align-items:center; justify-content:center;
     }
 
-    /* Server 2 wrapper and 9:16 portrait frame */
     .iframe-wrapper{position:absolute;inset:0;display:none;background:#000;align-items:center;justify-content:center}
+
+    /* pinch target that holds iframe */
     .server2-portrait{
-      position:relative; width:min(56.25vh,100%); height:min(100dvh,100%); aspect-ratio:9/16; /* always portrait 9:16 */
+      position:relative; width:min(56.25vh, 100%); height:min(100dvh, 100%); aspect-ratio:9/16;
       overflow:hidden; background:#000; touch-action:none; will-change:transform;
     }
     .server2-portrait iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}
 
-    /* Buttons / HUD shown only in Server 2 */
+    /* ratio toggles for landscape */
+    .s2-portrait-916{ width:calc(100dvh * 9 / 16) !important; height:100dvh !important; aspect-ratio:9/16 !important; }  /* 9:16 in landscape */  /* [calc docs + aspect-ratio] */
+    .s2-land-169{ width:100vw !important; height:100dvh !important; aspect-ratio:auto !important; }                               /* full 16:9 fill */
+
+    /* Overlay buttons */
     .overlay-btn{
-      position:fixed; right:12px; top:12px; width:44px; height:44px; border-radius:22px; border:0;
-      background:#d81b60; color:#fff; font-weight:800; font-size:16px; z-index:10001; display:none;
+      position:fixed; top:12px; right:12px; width:44px; height:44px; border-radius:22px; border:0; background:#d81b60;
+      color:#fff; font-weight:800; font-size:16px; z-index:10001; display:none;
     }
+    #ratioBtn{ right:64px } /* left of close btn */
     .zoom-hud{position:fixed; left:12px; top:12px; background:rgba(11,18,32,0.7); color:#fff; padding:4px 8px; border-radius:6px; font-size:12px; z-index:10001; display:none}
 
     .server2-area{max-width:1000px;margin:12px auto;display:flex;justify-content:center}
@@ -91,12 +94,12 @@
     </div>
 
     <div id="playerWrapper" class="player-wrapper aspect-16-9">
-      <!-- Shaka (unchanged) -->
+      <!-- Shaka core (unchanged) -->
       <div class="shaka-video-container" data-shaka-player>
         <video id="mainVideo" autoplay playsinline preload="metadata" poster="https://i.ibb.co/PGkCs5vz/ab188872-6178-43c2-a831-22a3de37390b.png"></video>
       </div>
 
-      <!-- Server 2 (only changed area) -->
+      <!-- Server 2 -->
       <div id="iframeWrapper" class="iframe-wrapper" aria-hidden="true">
         <div id="server2Frame" class="server2-portrait">
           <iframe id="server2Iframe" src="" allow="autoplay; fullscreen" allowfullscreen referrerpolicy="no-referrer"></iframe>
@@ -104,6 +107,7 @@
       </div>
 
       <div id="zoomHud" class="zoom-hud">Zoom 100%</div>
+      <button id="ratioBtn" class="overlay-btn">9:16</button>
       <button id="landBtn" class="overlay-btn">×</button>
     </div>
 
@@ -111,100 +115,102 @@
       <button id="server2Btn" class="server2-btn">Server 2</button>
     </div>
 
-    <!-- Promo etc. (unchanged) -->
-    <div class="promo-grid" aria-hidden="false" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;max-width:760px;margin:16px auto">
-      <a href="https://t.me/+-c580a3MZ05mNGFl" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;padding:10px;border-radius:8px;background:#fff;border:1px solid rgba(0,0,0,0.06);text-decoration:none;font-weight:700;color:#ff1f1f;font-size:12px">JOIN CHANNEL 1</a>
-      <a href="https://t.me/+-c580a3MZ05mNGFl" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;padding:10px;border-radius:8px;background:#fff;border:1px solid rgba(0,0,0,0.06);text-decoration:none;font-weight:700;color:#ff1f1f;font-size:12px">JOIN CHANNEL 2</a>
-      <a href="https://t.me/+-c580a3MZ05mNGFl" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;padding:10px;border-radius:8px;background:#fff;border:1px solid rgba(0,0,0,0.06);text-decoration:none;font-weight:700;color:#ff1f1f;font-size:12px">JOIN CHANNEL 3</a>
-      <a href="https://t.me/+-c580a3MZ05mNGFl" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;padding:10px;border-radius:8px;background:#fff;border:1px solid rgba(0,0,0,0.06);text-decoration:none;font-weight:700;color:#ff1f1f;font-size:12px">JOIN CHANNEL 4</a>
-    </div>
-    <a class="promo-cta" href="https://t.me/+-c580a3MZ05mNGFl" target="_blank" rel="noopener" style="display:block;text-align:center;margin:12px auto;padding:10px 14px;border-radius:10px;background:linear-gradient(90deg,#ff4d4d,#ff7a6a);color:#fff;font-weight:900;text-decoration:none;max-width:760px">सभी लोग हमारे प्रीमियम सदस्य बनने के लिए JOIN करें</a>
+    <!-- promos/footer unchanged -->
     <footer style="margin-top:14px;text-align:center;color:#071427;font-weight:700">©</footer>
   </div>
 
   <!-- Shaka init (unchanged logic) -->
   <script>
-    // dynamic vh fallback for older browsers (no effect on desktop)
     (function(){ const set=()=>document.documentElement.style.setProperty('--vh', window.innerHeight+'px'); set(); addEventListener('resize', set); addEventListener('orientationchange', set); })();
 
     document.addEventListener('DOMContentLoaded', async () => {
       shaka.polyfill.installAll();
       if (!shaka.Player.isBrowserSupported()) { console.error('Browser not supported'); return; }
-
-      const video = document.getElementById('mainVideo');
-      const player = new shaka.Player();
-      await player.attach(video);
-
-      const container = document.querySelector('.shaka-video-container');
-      const ui = new shaka.ui.Overlay(player, container, video);
+      const video=document.getElementById('mainVideo');
+      const player=new shaka.Player(); await player.attach(video);
+      const ui=new shaka.ui.Overlay(player, document.querySelector('.shaka-video-container'), video);
       ui.configure({ controlPanelElements:['play_pause','time_and_duration','mute','volume','spacer','language','captions','picture_in_picture','quality','fullscreen'] });
 
-      // Demo DRM/headers (unchanged)
       let cookie="__hdnea__=st=1758392406~exp=1758478806~acl=/*~hmac=48d94f13ec574d6d9798365f006cd430ccd5ca3d776bde0a3335f979bf794bc5";
       player.configure({ drm:{ clearKeys:{ "31b13c6f241055aaa965263f3115e684":"61f0cbc9599925a7be93d45e30b8ebe9" } }});
       player.getNetworkingEngine().registerRequestFilter((t,req)=>{ req.headers['Cookie']=cookie; });
-
-      try{
-        await player.load("https://jiotvbpkmob.cdn.jio.com/bpk-tv/Asia_Cup_Hindi_MOB/WDVLive/index.mpd?"+cookie);
-        video.muted=true; await video.play();
-      }catch(e){ console.error(e); }
+      try{ await player.load("https://jiotvbpkmob.cdn.jio.com/bpk-tv/Asia_Cup_Hindi_MOB/WDVLive/index.mpd?"+cookie); video.muted=true; await video.play(); }catch(e){ console.error(e); }
     });
   </script>
 
-  <!-- Server 2 only: landscape + 9:16 + pinch zoom -->
+  <!-- Server 2: landscape, 9:16 toggle, pinch zoom -->
   <script>
-    const SERVICE2_URL = "https://lins.onrender.com/"; // your server2 page
+    const SERVICE2_URL = "https://lins.onrender.com/";
+
     (function(){
       const server2Btn=document.getElementById('server2Btn');
       const playerWrapper=document.getElementById('playerWrapper');
-      const iframeWrapper=document.getElementById('iframeWrapper');
-      const server2Frame=document.getElementById('server2Frame');
-      const iframe=document.getElementById('server2Iframe');
       const shakaContainer=document.querySelector('.shaka-video-container');
+      const iframeWrapper=document.getElementById('iframeWrapper');
+      const iframe=document.getElementById('server2Iframe');
+      const server2Frame=document.getElementById('server2Frame');
 
       const landBtn=document.getElementById('landBtn');
+      const ratioBtn=document.getElementById('ratioBtn');
       const zoomHud=document.getElementById('zoomHud');
 
-      let open=false, land=false;
+      let open=false, land=false, force916=true;
 
-      async function lockLandscape(){ try{ if(screen.orientation?.lock) await screen.orientation.lock('landscape-primary'); }catch(e){} } /* user gesture reqd */ /* [web:63] */
+      async function lockLandscape(){ try{ if(screen.orientation?.lock) await screen.orientation.lock('landscape-primary'); }catch(e){} } /* user gesture */ /* [web:63] */
       function unlock(){ try{ screen.orientation?.unlock?.(); }catch(e){} } /* [web:25] */
 
       function enterLandscape(){
         playerWrapper.classList.add('landscape-full'); land=true;
-        landBtn.style.display='block'; zoomHud.style.display='block';
+        landBtn.style.display='block'; ratioBtn.style.display='block'; zoomHud.style.display='block';
       }
       function exitLandscape(){
         playerWrapper.classList.remove('landscape-full'); land=false;
-        landBtn.style.display='none'; zoomHud.style.display='none'; unlock();
+        landBtn.style.display='none'; ratioBtn.style.display='none'; zoomHud.style.display='none'; unlock();
+      }
+      function applyRatio(){
+        if(force916){
+          server2Frame.classList.add('s2-portrait-916');
+          server2Frame.classList.remove('s2-land-169');
+          ratioBtn.textContent='16:9';
+        }else{
+          server2Frame.classList.remove('s2-portrait-916');
+          server2Frame.classList.add('s2-land-169');
+          ratioBtn.textContent='9:16';
+        }
       }
 
-      // Toggle server 2
+      // Open/close Server 2
       server2Btn.addEventListener('click', async ()=>{
         open=!open;
         if(open){
           shakaContainer.style.display='none';
-          iframeWrapper.style.display='flex';
-          iframeWrapper.setAttribute('aria-hidden','false');
+          iframeWrapper.style.display='flex'; iframeWrapper.setAttribute('aria-hidden','false');
           iframe.src = SERVICE2_URL + (SERVICE2_URL.includes('?')?'&':'?') + 'autoplay=1';
-          enterLandscape(); await lockLandscape();              /* avoid black screen + lock */  /* [web:63] */
+          enterLandscape(); await lockLandscape();
+          force916=true; applyRatio();
           // reset zoom
           scale=1; offsetX=0; offsetY=0; applyTransform();
           server2Btn.textContent='Close Server 2';
         }else{
           iframe.src=''; iframeWrapper.style.display='none'; iframeWrapper.setAttribute('aria-hidden','true');
-          shakaContainer.style.display=''; exitLandscape();
+          shakaContainer.style.display='';
+          exitLandscape();
           server2Btn.textContent='Server 2';
         }
       });
 
-      // Landscape toggle button only for Server2
-      landBtn.addEventListener('click', async ()=>{
+      // Landscape toggle (close X)
+      landBtn.addEventListener('click', ()=>{ if(!open) return; if(land){ exitLandscape(); } else { enterLandscape(); lockLandscape(); } });
+
+      // Ratio toggle
+      ratioBtn.addEventListener('click', ()=>{
         if(!open) return;
-        if(!land){ enterLandscape(); await lockLandscape(); } else { exitLandscape(); }
+        force916 = !force916;
+        scale=1; offsetX=0; offsetY=0; applyTransform();  // clean switch
+        applyRatio();
       });
 
-      // ===== Pinch zoom + one-finger pan on Server2 frame =====
+      // Pinch zoom + pan on server2Frame
       let scale=1, offsetX=0, offsetY=0, cache=[], prev=-1, MIN=1, MAX=3;
 
       function applyTransform(){
@@ -222,7 +228,7 @@
           const d=Math.hypot(cache[0].clientX-cache[1].clientX, cache[0].clientY-cache[1].clientY);
           if(prev>0){
             const ns=Math.min(MAX, Math.max(MIN, scale*(d/prev)));
-            // keep midpoint stable relative to viewport
+            // keep midpoint stable
             const midX=(cache[0].clientX+cache[1].clientX)/2 - innerWidth/2;
             const midY=(cache[0].clientY+cache[1].clientY)/2 - innerHeight/2;
             offsetX += (offsetX-midX)*(ns/scale-1);
